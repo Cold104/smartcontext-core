@@ -1,0 +1,20 @@
+SmartContext Core
+Copyright 2025–2026 Charles R. Mason
+
+This product includes software developed for SmartContext Core
+(the Go MCP skill/rule packer), licensed under the Apache License,
+Version 2.0.
+
+This NOTICE file is provided for attribution under Apache-2.0 §4(d).
+It does not modify the License.
+
+---------------------------------------------------------------------
+Third-party components (Go Core module under go/)
+
+- github.com/modelcontextprotocol/go-sdk — see upstream LICENSE
+- golang.org/x/sys and related x/ modules — BSD-style; see go.sum / module cache
+
+Python package metadata under pyproject.toml may still list a legacy MIT
+field for the historical Python surface; the published **Go Core** line is
+Apache-2.0. Pro features (factory, harvest, self-learn, orch, Lathe) are not
+part of the Core OSS claim — see Docs/OVERVIEW/OSS_PRO_BOUNDARY.md.

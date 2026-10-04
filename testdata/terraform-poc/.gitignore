@@ -1,0 +1,9 @@
+**/.terraform/
+**/.terraform.lock.hcl
+**/terraform.tfstate
+**/terraform.tfstate.backup
+**/moved.tfstate
+**/other.tfstate
+**/apply.out
+**/apply.err
+_run_*.txt

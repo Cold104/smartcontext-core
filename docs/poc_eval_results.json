@@ -1,0 +1,204 @@
+{
+  "version": "1.1.0",
+  "captured_at": "2026-10-03T05:37:32Z",
+  "host_note": "Windows local POC eval; in-process core + in-memory MCP",
+  "fixture_skill_count": 15,
+  "discover_fixture_ms_p50": 2.28,
+  "discover_fixture_ms_avg": 3.8606249999999998,
+  "catalog_build_ms_p50": 2.28,
+  "catalog_build_ms_avg": 3.8606249999999998,
+  "pack_ms_p50": 3.6025,
+  "pack_ms_avg": 3.6423392857142853,
+  "pack_samples": 56,
+  "selection_hit_rate": 1,
+  "hits": 6,
+  "scored_tasks": 6,
+  "mean_recall_at_k": 1,
+  "default_roots_discover_ms": 7.544,
+  "default_root_count": 14,
+  "default_catalog_size": 18,
+  "repack_after_catalog_change_ms": 5.168,
+  "mcp_tool_names": [
+    "discover_skills",
+    "host_info",
+    "pack_context"
+  ],
+  "mcp_has_pack_context": true,
+  "mcp_has_create_or_factory": false,
+  "mcp_has_refine": false,
+  "mcp_pack_ms_p50": 4.143000000000001,
+  "mcp_pack_ms_avg": 4.552,
+  "tasks": [
+    {
+      "id": "hermes-team",
+      "prompt": "launch Hermes engineering team containers docker persona indexer",
+      "gold": [
+        "hermes-agent-team",
+        "docker-personas"
+      ],
+      "negative": false,
+      "selected": [
+        "hermes-agent-team",
+        "docker-personas",
+        "cycle-review",
+        "context-budget",
+        "frontmatter-parse"
+      ],
+      "hit": true,
+      "recall_at_k": 1,
+      "lead_score": 17.867368694393576,
+      "latency_ms_p50": 3.6105,
+      "latency_ms_avg": 3.5519999999999996,
+      "selected_count": 5,
+      "catalog_size_hint": 15,
+      "root_count": 1
+    },
+    {
+      "id": "skill-index",
+      "prompt": "index Cursor skills and rules into a catalog with frontmatter",
+      "gold": [
+        "skill-catalog",
+        "frontmatter-parse"
+      ],
+      "negative": false,
+      "selected": [
+        "skill-catalog",
+        "frontmatter-parse",
+        "token-pack",
+        "context-budget",
+        "cycle-review"
+      ],
+      "hit": true,
+      "recall_at_k": 1,
+      "lead_score": 11.674821087703869,
+      "latency_ms_p50": 4.0184999999999995,
+      "latency_ms_avg": 3.8834999999999997,
+      "selected_count": 5,
+      "catalog_size_hint": 15,
+      "root_count": 1
+    },
+    {
+      "id": "windows-smartcontext",
+      "prompt": "Windows PowerShell SmartContext development on F drive paths",
+      "gold": [
+        "windows-dev",
+        "powershell-paths"
+      ],
+      "negative": false,
+      "selected": [
+        "windows-dev",
+        "powershell-paths",
+        "context-budget",
+        "cycle-review",
+        "docker-personas"
+      ],
+      "hit": true,
+      "recall_at_k": 1,
+      "lead_score": 11.795476898172979,
+      "latency_ms_p50": 3.322,
+      "latency_ms_avg": 3.65475,
+      "selected_count": 5,
+      "catalog_size_hint": 15,
+      "root_count": 1
+    },
+    {
+      "id": "token-ingest",
+      "prompt": "reduce token usage when ingesting code into Cursor chat context",
+      "gold": [
+        "token-pack",
+        "context-budget"
+      ],
+      "negative": false,
+      "selected": [
+        "token-pack",
+        "context-budget",
+        "skill-catalog",
+        "cycle-review",
+        "docker-personas"
+      ],
+      "hit": true,
+      "recall_at_k": 1,
+      "lead_score": 7.16703787691222,
+      "latency_ms_p50": 3.615,
+      "latency_ms_avg": 3.65975,
+      "selected_count": 5,
+      "catalog_size_hint": 15,
+      "root_count": 1
+    },
+    {
+      "id": "cycle-review",
+      "prompt": "evaluate Hermes cycle with lint smoke review before DONE merge",
+      "gold": [
+        "cycle-review",
+        "merge-gate"
+      ],
+      "negative": false,
+      "selected": [
+        "cycle-review",
+        "merge-gate",
+        "hermes-agent-team",
+        "context-budget",
+        "docker-personas"
+      ],
+      "hit": true,
+      "recall_at_k": 1,
+      "lead_score": 18.21567538866179,
+      "latency_ms_p50": 3.6029999999999998,
+      "latency_ms_avg": 3.642375,
+      "selected_count": 5,
+      "catalog_size_hint": 15,
+      "root_count": 1
+    },
+    {
+      "id": "distractor-cooking",
+      "prompt": "sourdough bread recipes and kitchen timer techniques",
+      "gold": [
+        "unrelated-cooking"
+      ],
+      "negative": false,
+      "selected": [
+        "unrelated-cooking",
+        "context-budget",
+        "cycle-review",
+        "docker-personas",
+        "frontmatter-parse"
+      ],
+      "hit": true,
+      "recall_at_k": 1,
+      "lead_score": 10.700330817481355,
+      "latency_ms_p50": 3.5975,
+      "latency_ms_avg": 3.599125,
+      "selected_count": 5,
+      "catalog_size_hint": 15,
+      "root_count": 1
+    },
+    {
+      "id": "negative-astronomy",
+      "prompt": "orbital mechanics of exoplanet transit photometry",
+      "gold": null,
+      "negative": true,
+      "selected": [
+        "context-budget",
+        "cycle-review",
+        "docker-personas",
+        "frontmatter-parse",
+        "hermes-agent-team"
+      ],
+      "hit": true,
+      "recall_at_k": 0,
+      "lead_score": 0,
+      "latency_ms_p50": 3.5745,
+      "latency_ms_avg": 3.5048749999999997,
+      "selected_count": 5,
+      "catalog_size_hint": 15,
+      "root_count": 1,
+      "negative_ok": true
+    }
+  ],
+  "functionality": {
+    "creation": "N/A",
+    "discovery": "pass",
+    "packing": "pass",
+    "refinement": "partial"
+  }
+}

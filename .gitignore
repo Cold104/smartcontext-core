@@ -1,0 +1,54 @@
+# Python artifacts
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+
+# Virtual environment
+.venv/
+venv/
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+
+# VS Code
+.vscode/
+
+# Lathe engineering sandbox (personas write here only)
+.hermes-work/
+
+# Local smoke / scratch catalogs (lifecycle manual runs)
+.smoke-lifecycle/
+
+# Go binary build output (v1.1 module under go/)
+go/smartcontext
+go/smartcontext.exe
+go/**/*.exe
+go/**/*.exe~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+tmp_run_lathe.py
+tmp_run_hermes.py
+
+# Lab evidence runtime noise (keep committed reports/JSON snapshots)
+docs/evidence/_lathe_ingest_cache/
+docs/evidence/.research_monitor_state.json
+docs/evidence/research_monitor.jsonl
+docs/evidence/research_monitor.log
+docs/evidence/*.run.log
+docs/evidence/*.err.log
+docs/evidence/resource_capture_post_profile_a.json
+
+*.exe
+*.exe~
+*.test
+*.out
+.idea/
+.vscode/
+.DS_Store

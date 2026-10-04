@@ -1,0 +1,9 @@
+{
+  "ID": "00000000-dead-beef-cafe-000000000001",
+  "Operation": "OperationTypeApply",
+  "Info": "stale lock for skill POC",
+  "Who": "poc@terraform-skill",
+  "Version": "1.5.7",
+  "Created": "2024-01-15T12:00:00.000000Z",
+  "Path": "terraform.tfstate"
+}

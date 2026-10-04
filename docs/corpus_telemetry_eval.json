@@ -1,0 +1,449 @@
+{
+  "version": "1.2.0",
+  "captured_at": "2026-10-04T15:40:52Z",
+  "host_note": "Windows local corpus+telemetry eval; isolated SMARTCONTEXT_HOME + SKILL_ROOTS",
+  "publication_gate": "CLOSED — local measurement only; no Python parity / publication claim",
+  "top_n": 5,
+  "budget_tokens": 2000,
+  "pack_iters": 8,
+  "min_reduction_required": 0.7,
+  "min_recall_required": 0.8,
+  "token_suite": {
+    "name": "token_benchmark",
+    "skill_count": 15,
+    "hits": 5,
+    "scored_tasks": 5,
+    "hit_rate": 1,
+    "mean_recall_at_k": 1,
+    "median_reduction": 0.7245134068327208,
+    "mean_reduction": 0.7242956308697427,
+    "pack_ms_p50": 6.217499999999999,
+    "pack_ms_p95": 7.245049999999999,
+    "pack_ms_avg": 6.311399999999999,
+    "discover_ms_p50": 2.8705,
+    "discover_ms_p95": 9.508999999999993,
+    "naive_baseline_tokens": 7347,
+    "tasks": [
+      {
+        "id": "hermes-team",
+        "suite": "token_benchmark",
+        "prompt": "launch Hermes engineering team containers docker persona indexer",
+        "gold": [
+          "hermes-agent-team",
+          "docker-personas"
+        ],
+        "selected": [
+          "hermes-agent-team",
+          "docker-personas",
+          "cycle-review",
+          "context-budget",
+          "frontmatter-parse"
+        ],
+        "hit": true,
+        "recall_at_k": 1,
+        "naive_tokens": 7347,
+        "estimated_tokens": 2032,
+        "budget_tokens": 2000,
+        "selected_count": 5,
+        "reduction": 0.7234245270178304,
+        "latency_ms_p50": 6.448,
+        "latency_ms_p95": 7.29155,
+        "latency_ms_avg": 6.4738750000000005
+      },
+      {
+        "id": "skill-index",
+        "suite": "token_benchmark",
+        "prompt": "index Cursor skills and rules into a catalog with frontmatter",
+        "gold": [
+          "skill-catalog",
+          "frontmatter-parse"
+        ],
+        "selected": [
+          "skill-catalog",
+          "frontmatter-parse",
+          "token-pack",
+          "context-budget",
+          "cycle-review"
+        ],
+        "hit": true,
+        "recall_at_k": 1,
+        "naive_tokens": 7347,
+        "estimated_tokens": 2025,
+        "budget_tokens": 2000,
+        "selected_count": 5,
+        "reduction": 0.7243772968558595,
+        "latency_ms_p50": 6.188,
+        "latency_ms_p95": 6.5522,
+        "latency_ms_avg": 6.130000000000001
+      },
+      {
+        "id": "windows-paths",
+        "suite": "token_benchmark",
+        "prompt": "Windows PowerShell paths F drive quoting for Python scripts",
+        "gold": [
+          "windows-dev",
+          "powershell-paths"
+        ],
+        "selected": [
+          "powershell-paths",
+          "windows-dev",
+          "context-budget",
+          "cycle-review",
+          "docker-personas"
+        ],
+        "hit": true,
+        "recall_at_k": 1,
+        "naive_tokens": 7347,
+        "estimated_tokens": 2023,
+        "budget_tokens": 2000,
+        "selected_count": 5,
+        "reduction": 0.7246495168095821,
+        "latency_ms_p50": 6.260999999999999,
+        "latency_ms_p95": 8.00245,
+        "latency_ms_avg": 6.511375000000001
+      },
+      {
+        "id": "token-ingest",
+        "suite": "token_benchmark",
+        "prompt": "reduce token usage when ingesting code into Cursor chat context",
+        "gold": [
+          "token-pack",
+          "context-budget"
+        ],
+        "selected": [
+          "token-pack",
+          "context-budget",
+          "skill-catalog",
+          "cycle-review",
+          "docker-personas"
+        ],
+        "hit": true,
+        "recall_at_k": 1,
+        "naive_tokens": 7347,
+        "estimated_tokens": 2024,
+        "budget_tokens": 2000,
+        "selected_count": 5,
+        "reduction": 0.7245134068327208,
+        "latency_ms_p50": 6.18,
+        "latency_ms_p95": 6.24185,
+        "latency_ms_avg": 6.012875
+      },
+      {
+        "id": "cycle-review",
+        "suite": "token_benchmark",
+        "prompt": "evaluate Hermes cycle with lint smoke review before DONE merge",
+        "gold": [
+          "cycle-review",
+          "merge-gate"
+        ],
+        "selected": [
+          "cycle-review",
+          "merge-gate",
+          "hermes-agent-team",
+          "context-budget",
+          "docker-personas"
+        ],
+        "hit": true,
+        "recall_at_k": 1,
+        "naive_tokens": 7347,
+        "estimated_tokens": 2024,
+        "budget_tokens": 2000,
+        "selected_count": 5,
+        "reduction": 0.7245134068327208,
+        "latency_ms_p50": 6.348000000000001,
+        "latency_ms_p95": 7.0548,
+        "latency_ms_avg": 6.428875000000001
+      }
+    ],
+    "gate_ok": true
+  },
+  "role_suite": {
+    "name": "role_token_benchmark",
+    "skill_count": 48,
+    "hits": 8,
+    "scored_tasks": 8,
+    "hit_rate": 1,
+    "mean_recall_at_k": 1,
+    "median_reduction": 0.9152246290435283,
+    "mean_reduction": 0.9150602162028854,
+    "pack_ms_p50": 11.9265,
+    "pack_ms_p95": 12.977549999999997,
+    "pack_ms_avg": 11.97609375,
+    "discover_ms_p50": 8.2305,
+    "discover_ms_p95": 29.859399999999983,
+    "naive_baseline_tokens": 24329,
+    "tasks": [
+      {
+        "id": "data_analytics",
+        "suite": "role_token_benchmark",
+        "prompt": "Explain churn KPI from Snowflake via Looker explore and draft an Amplitude chart definition using the dbt semantic layer",
+        "gold": [
+          "dbt-semantic-layer",
+          "looker-explore-router",
+          "amplitude-analyze-chart"
+        ],
+        "selected": [
+          "dbt-semantic-layer",
+          "amplitude-analyze-chart",
+          "looker-explore-router",
+          "dbt-analytics-engineering",
+          "amplitude-weekly-product-review"
+        ],
+        "hit": true,
+        "recall_at_k": 1,
+        "naive_tokens": 24329,
+        "estimated_tokens": 2097,
+        "budget_tokens": 2000,
+        "selected_count": 5,
+        "reduction": 0.9138065682929837,
+        "latency_ms_p50": 11.951,
+        "latency_ms_p95": 12.67015,
+        "latency_ms_avg": 12.049750000000001
+      },
+      {
+        "id": "product_management",
+        "suite": "role_token_benchmark",
+        "prompt": "Weekly product review: LaunchDarkly flag exposure, Pendo friction themes, and Figma spec handoff for checkout",
+        "gold": [
+          "amplitude-weekly-product-review",
+          "launchdarkly-flag-rollout",
+          "pendo-friction-themes"
+        ],
+        "selected": [
+          "figma-spec-handoff",
+          "pendo-friction-themes",
+          "amplitude-weekly-product-review",
+          "launchdarkly-flag-rollout",
+          "docker-review"
+        ],
+        "hit": true,
+        "recall_at_k": 1,
+        "naive_tokens": 24329,
+        "estimated_tokens": 2075,
+        "budget_tokens": 2000,
+        "selected_count": 5,
+        "reduction": 0.9147108389165194,
+        "latency_ms_p50": 12.014,
+        "latency_ms_p95": 12.730599999999999,
+        "latency_ms_avg": 12.062624999999999
+      },
+      {
+        "id": "software_development",
+        "suite": "role_token_benchmark",
+        "prompt": "Add a shared health-check endpoint pattern for NestJS and .NET Aspire and mirror a Django smoke test",
+        "gold": [
+          "nestjs-module-patterns",
+          "aspire-service-defaults",
+          "django-orm-migrations"
+        ],
+        "selected": [
+          "nestjs-module-patterns",
+          "django-orm-migrations",
+          "aspire-service-defaults",
+          "write-tests",
+          "dbt-analytics-engineering"
+        ],
+        "hit": true,
+        "recall_at_k": 1,
+        "naive_tokens": 24329,
+        "estimated_tokens": 2064,
+        "budget_tokens": 2000,
+        "selected_count": 5,
+        "reduction": 0.9151629742282872,
+        "latency_ms_p50": 12.207,
+        "latency_ms_p95": 13.328050000000001,
+        "latency_ms_avg": 11.989625
+      },
+      {
+        "id": "networking",
+        "suite": "role_token_benchmark",
+        "prompt": "Tighten Istio mTLS for payments, mirror rate limits in HAProxy, and note the Cisco ACI contract impact",
+        "gold": [
+          "istio-traffic-management",
+          "haproxy-acl-tuning",
+          "cisco-aci-epg-contracts"
+        ],
+        "selected": [
+          "cisco-aci-epg-contracts",
+          "haproxy-acl-tuning",
+          "istio-traffic-management",
+          "data-contracts-dq",
+          "service-mesh-mtls"
+        ],
+        "hit": true,
+        "recall_at_k": 1,
+        "naive_tokens": 24329,
+        "estimated_tokens": 2061,
+        "budget_tokens": 2000,
+        "selected_count": 5,
+        "reduction": 0.9152862838587694,
+        "latency_ms_p50": 11.853000000000002,
+        "latency_ms_p95": 12.467099999999999,
+        "latency_ms_avg": 11.810500000000001
+      },
+      {
+        "id": "security",
+        "suite": "role_token_benchmark",
+        "prompt": "Review an AWS IAM role for CI OIDC, map Prisma Cloud misconfigurations, and draft a CrowdStrike detection note",
+        "gold": [
+          "aws-iam",
+          "prisma-cloud-misconfig",
+          "crowdstrike-detection-triage"
+        ],
+        "selected": [
+          "crowdstrike-detection-triage",
+          "prisma-cloud-misconfig",
+          "aws-iam",
+          "gitlab-ci-oidc",
+          "pipeline-review"
+        ],
+        "hit": true,
+        "recall_at_k": 1,
+        "naive_tokens": 24329,
+        "estimated_tokens": 2046,
+        "budget_tokens": 2000,
+        "selected_count": 5,
+        "reduction": 0.9159028320111801,
+        "latency_ms_p50": 11.6875,
+        "latency_ms_p95": 13.29155,
+        "latency_ms_avg": 11.938375
+      },
+      {
+        "id": "devops",
+        "suite": "role_token_benchmark",
+        "prompt": "GitLab CI job is flaky on the Pulumi preview step; compare against the Spinnaker canary gate for release readiness",
+        "gold": [
+          "gitlab-ci-oidc",
+          "pulumi-preview-review",
+          "spinnaker-pipeline-templates"
+        ],
+        "selected": [
+          "gitlab-ci-oidc",
+          "pulumi-preview-review",
+          "release-readiness",
+          "spinnaker-pipeline-templates",
+          "sonarqube-quality-gate"
+        ],
+        "hit": true,
+        "recall_at_k": 1,
+        "naive_tokens": 24329,
+        "estimated_tokens": 2059,
+        "budget_tokens": 2000,
+        "selected_count": 5,
+        "reduction": 0.9153684902790908,
+        "latency_ms_p50": 12.0075,
+        "latency_ms_p95": 12.43315,
+        "latency_ms_avg": 12.047375
+      },
+      {
+        "id": "devsecops",
+        "suite": "role_token_benchmark",
+        "prompt": "Triage a Checkov S3 failure, map it to a SonarQube hotspot, and plan an OWASP ZAP baseline in the merge-request pipeline",
+        "gold": [
+          "checkov-policy-suppressions",
+          "sonarqube-quality-gate",
+          "owasp-zap-baseline"
+        ],
+        "selected": [
+          "owasp-zap-baseline",
+          "sonarqube-quality-gate",
+          "checkov-policy-suppressions",
+          "crowdstrike-detection-triage",
+          "pipeline-review"
+        ],
+        "hit": true,
+        "recall_at_k": 1,
+        "naive_tokens": 24329,
+        "estimated_tokens": 2073,
+        "budget_tokens": 2000,
+        "selected_count": 5,
+        "reduction": 0.9147930453368408,
+        "latency_ms_p50": 11.9185,
+        "latency_ms_p95": 12.454550000000001,
+        "latency_ms_avg": 11.928375
+      },
+      {
+        "id": "platform_engineering",
+        "suite": "role_token_benchmark",
+        "prompt": "Add a Crossplane XRD for Redis, expose a Port.io blueprint, and document Kubernetes resource quotas for tenants",
+        "gold": [
+          "crossplane-composition",
+          "port-blueprint",
+          "kubernetes-ops"
+        ],
+        "selected": [
+          "port-blueprint",
+          "crossplane-composition",
+          "kubernetes-ops",
+          "cisco-aci-epg-contracts",
+          "amplitude-analyze-chart"
+        ],
+        "hit": true,
+        "recall_at_k": 1,
+        "naive_tokens": 24329,
+        "estimated_tokens": 2057,
+        "budget_tokens": 2000,
+        "selected_count": 5,
+        "reduction": 0.9154506966994123,
+        "latency_ms_p50": 11.96,
+        "latency_ms_p95": 13.02635,
+        "latency_ms_avg": 11.982125
+      }
+    ],
+    "gate_ok": true
+  },
+  "mcp_discover_ms_p50": 3.4425,
+  "mcp_discover_ms_p95": 4.00285,
+  "mcp_pack_ms_p50": 8.253499999999999,
+  "mcp_pack_ms_p95": 8.7332,
+  "mcp_tool_names": [
+    "discover_skills",
+    "factory_apply",
+    "factory_create",
+    "factory_status",
+    "host_info",
+    "offload_tool_result",
+    "pack_context",
+    "session_start",
+    "skills_refine_list"
+  ],
+  "case_study": {
+    "cold_empty_catalog": true,
+    "cold_selected_count": 0,
+    "seeded_catalog_size": 1,
+    "seeded_pack_hit": true,
+    "seeded_selected": [
+      "windows-dev"
+    ],
+    "note": "Thin stand-in for docs/CASE_STUDIES_SKILLS.md A/B; no factory/refine/Canvas"
+  },
+  "telemetry": {
+    "lifecycle_enabled": true,
+    "isolated_home": "C:\\Users\\cmaso\\AppData\\Local\\Temp\\sc-corpus-telemetry-1246787244\\sc-home",
+    "events_path": "C:\\Users\\cmaso\\AppData\\Local\\Temp\\sc-corpus-telemetry-1246787244\\sc-home\\telemetry\\events.jsonl",
+    "pack_events_written": 117,
+    "jsonl_bytes": 53611,
+    "jsonl_lines": 117,
+    "raw_task_leaked": false,
+    "memory_event_count": 3,
+    "run_telemetry_log": "F:\\Projects\\SmartContext\\Repos\\smartcontext\\go\\docs\\corpus_telemetry_run.jsonl",
+    "run_telemetry_log_lines": 13,
+    "note": "Local JSONL under SMARTCONTEXT_HOME/telemetry; no upload. Pack suites also emit via lifecycle.PackContext."
+  },
+  "python_cited_evidence": {
+    "gates": "median reduction \u003e= 70%; mean recall@5 \u003e= 80%",
+    "note": "Cited only; Python baseline not re-executed in this harness run.",
+    "recorded_mean_recall_at_5": 0.927,
+    "recorded_median_reduction": 0.863,
+    "source": "docs/requirements.md (product docs; not re-run here)"
+  },
+  "gaps_vs_python": [
+    "Python refund-receipt / metrics_summary aggregates (load_aggregates, export_refund_receipt) — Go has local JSONL RecordEvent only; no receipt builder",
+    "Python case studies refine_scan + factory apply + Canvas CTA — Go case study is cold empty vs seeded pack only",
+    "Python include_security_report=False for token gate — Go pack markdown always includes scrub report lines (methodology delta)",
+    "Python .cursor/rules/*.mdc in token fixture — Go discover is SKILL.md-only in this harness",
+    "Diehard held-out ladder / Lathe stack-eval ingest — out of scope",
+    "Core micro-bench Budget.for_ci latency gates — ported (go/docs/LATENCY.md; TestLatencyBudgets + CI benches)",
+    "Remote / upload telemetry lifecycle — intentionally not required; local JSONL only"
+  ]
+}

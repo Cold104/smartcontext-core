@@ -1,0 +1,145 @@
+{
+  "version": 1,
+  "schema": "smartcontext.skill_rule_index/v1",
+  "note": "Agents ADD rows only. Columns are locked; bodies may be stubs until the baseline corpus PR lands.",
+  "columns": [
+    "kind",
+    "name",
+    "description",
+    "os",
+    "tags",
+    "triggers",
+    "related",
+    "aliases",
+    "applies_to",
+    "governed_by",
+    "path"
+  ],
+  "entries": [
+    {
+      "kind": "skill",
+      "name": "reference-and-skillize",
+      "description": "Stub: docs → extract → create skills (meta workflow).",
+      "os": "any",
+      "tags": ["meta", "skill-factory", "docs"],
+      "triggers": ["skillize", "extract skill", "from docs"],
+      "related": ["smartcontext-pack-operator", "error-class-playbook"],
+      "aliases": ["skillize", "docs-to-skill"],
+      "governed_by": ["secure-pack-hygiene"],
+      "path": "skills/reference-and-skillize/SKILL.md"
+    },
+    {
+      "kind": "skill",
+      "name": "smartcontext-pack-operator",
+      "description": "Stub: discover_skills / host_info / pack_context operator workflow.",
+      "os": "any",
+      "tags": ["pack", "mcp", "discover"],
+      "triggers": ["pack_context", "discover_skills", "empty catalog"],
+      "related": ["budget-aware-packing", "host-os-windows", "host-os-linux", "host-os-macos"],
+      "aliases": ["pack operator", "how do I pack"],
+      "governed_by": ["secure-pack-hygiene", "budget-policy"],
+      "path": "skills/smartcontext-pack-operator/SKILL.md"
+    },
+    {
+      "kind": "skill",
+      "name": "eval-hygiene",
+      "description": "Stub: keep eval fixtures and gold labels honest.",
+      "os": "any",
+      "tags": ["eval", "testing"],
+      "triggers": ["fixture", "gold label", "eval harness"],
+      "related": ["error-class-playbook"],
+      "aliases": ["eval hygiene"],
+      "governed_by": [],
+      "path": "skills/eval-hygiene/SKILL.md"
+    },
+    {
+      "kind": "skill",
+      "name": "error-class-playbook",
+      "description": "Stub: classify errors and route to the right skill.",
+      "os": "any",
+      "tags": ["errors", "triage"],
+      "triggers": ["error class", "traceback", "exit code"],
+      "related": ["reference-and-skillize", "smartcontext-pack-operator"],
+      "aliases": ["error playbook"],
+      "governed_by": [],
+      "path": "skills/error-class-playbook/SKILL.md"
+    },
+    {
+      "kind": "skill",
+      "name": "budget-aware-packing",
+      "description": "Stub: Super saver / Balanced / Max / auto; 60s plan-mode timeout → auto.",
+      "os": "any",
+      "tags": ["budget", "pack"],
+      "triggers": ["budget", "super_saver", "balanced", "token budget"],
+      "related": ["smartcontext-pack-operator"],
+      "aliases": ["budget packing", "token dial"],
+      "governed_by": ["budget-policy", "secure-pack-hygiene"],
+      "path": "skills/budget-aware-packing/SKILL.md"
+    },
+    {
+      "kind": "skill",
+      "name": "host-os-windows",
+      "description": "Stub: Windows host patterns for pack/discover.",
+      "os": "windows",
+      "tags": ["os", "windows"],
+      "triggers": ["PowerShell", "win32", "Windows"],
+      "related": ["host-os-linux", "host-os-macos", "smartcontext-pack-operator"],
+      "aliases": ["windows host"],
+      "governed_by": [],
+      "path": "skills/host-os-windows/SKILL.md"
+    },
+    {
+      "kind": "skill",
+      "name": "host-os-linux",
+      "description": "Stub: Linux host patterns for pack/discover.",
+      "os": "linux",
+      "tags": ["os", "linux"],
+      "triggers": ["bash", "systemd", "Linux"],
+      "related": ["host-os-windows", "host-os-macos", "smartcontext-pack-operator"],
+      "aliases": ["linux host"],
+      "governed_by": [],
+      "path": "skills/host-os-linux/SKILL.md"
+    },
+    {
+      "kind": "skill",
+      "name": "host-os-macos",
+      "description": "Stub: macOS host patterns for pack/discover.",
+      "os": "macos",
+      "tags": ["os", "macos"],
+      "triggers": ["darwin", "zsh", "macOS"],
+      "related": ["host-os-windows", "host-os-linux", "smartcontext-pack-operator"],
+      "aliases": ["macos host", "darwin host"],
+      "governed_by": [],
+      "path": "skills/host-os-macos/SKILL.md"
+    },
+    {
+      "kind": "rule",
+      "name": "secure-pack-hygiene",
+      "description": "Stub: limitations on pack/factory — no secrets in packed bodies; consent-gated writes.",
+      "os": "any",
+      "tags": ["security", "pack", "factory"],
+      "triggers": ["secret", "API_KEY", ".env", "consent"],
+      "related": [],
+      "aliases": ["secure hygiene", "no-secrets-in-pack"],
+      "applies_to": [
+        "smartcontext-pack-operator",
+        "budget-aware-packing",
+        "reference-and-skillize",
+        "tag:factory"
+      ],
+      "path": "rules/secure-pack-hygiene/RULE.md"
+    },
+    {
+      "kind": "rule",
+      "name": "budget-policy",
+      "description": "Stub: hard caps / no unbounded max; plan-mode 60s → auto.",
+      "os": "any",
+      "tags": ["budget", "policy"],
+      "triggers": ["budget_tokens", "unbounded", "max"],
+      "related": [],
+      "aliases": ["budget guardrail"],
+      "applies_to": ["budget-aware-packing", "smartcontext-pack-operator", "*"],
+      "path": "rules/budget-policy/RULE.md"
+    }
+  ]
+}

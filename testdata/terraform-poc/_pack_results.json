@@ -1,0 +1,57 @@
+[
+  {
+    "task": "terraform plan fails with Invalid for_each argument list of string",
+    "selected_names": [
+      "terraform-invalid-foreach",
+      "terraform-state-lock",
+      "terraform-backend-reconfigure",
+      "terraform-cycle-depends",
+      "terraform-provider-constraint"
+    ],
+    "hit_terraform_skill": true
+  },
+  {
+    "task": "terraform Cycle null_resource depends_on circular dependency",
+    "selected_names": [
+      "terraform-cycle-depends",
+      "terraform-provider-constraint",
+      "terraform-backend-reconfigure",
+      "terraform-invalid-foreach",
+      "terraform-state-lock"
+    ],
+    "hit_terraform_skill": true
+  },
+  {
+    "task": "terraform init Failed to query available provider packages no releases match constraints",
+    "selected_names": [
+      "terraform-provider-constraint",
+      "terraform-invalid-foreach",
+      "terraform-backend-reconfigure",
+      "terraform-cycle-depends",
+      "terraform-state-lock"
+    ],
+    "hit_terraform_skill": true
+  },
+  {
+    "task": "Error acquiring the state lock terraform force-unlock",
+    "selected_names": [
+      "terraform-state-lock",
+      "terraform-backend-reconfigure",
+      "terraform-cycle-depends",
+      "terraform-invalid-foreach",
+      "terraform-provider-constraint"
+    ],
+    "hit_terraform_skill": true
+  },
+  {
+    "task": "Backend configuration changed terraform init migrate-state reconfigure",
+    "selected_names": [
+      "terraform-backend-reconfigure",
+      "terraform-state-lock",
+      "terraform-provider-constraint",
+      "terraform-cycle-depends",
+      "terraform-invalid-foreach"
+    ],
+    "hit_terraform_skill": true
+  }
+]
