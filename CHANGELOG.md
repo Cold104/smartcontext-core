@@ -1,5 +1,20 @@
 # Changelog — SmartContext Go MCP
 
+## [1.3.0] — 2026-10-04
+
+G-1 Prompt-Cache Aligned stable reuse. Publication gate **OPEN for Core only**.
+
+### Added / changed
+
+- **G-1 `markdown_stable` reuse:** process-local memo keyed by
+  `StableMemoKey(selected_names, version)` (sorted name set + version). When the
+  key is unchanged across packs, Core reuses prior `markdown_stable` bytes and
+  only rebuilds `markdown_dynamic` (task/budget/scores). Marketed as
+  **Prompt-Cache Aligned**. Docs: `docs/PREFIX_CACHE_PACK.md`, `docs/LATENCY.md`.
+- **Tests:** `TestMarkdownStableReuseWhenSelectedNamesUnchanged` (hit + dynamic
+  task update) and selection-change miss.
+- **Version:** `version.Version` → **1.3.0**.
+
 ## [1.2.1] — 2026-10-04
 
 Post-1.2 latency harden + trajectory/opt-out lock. Publication gate **CLOSED**.

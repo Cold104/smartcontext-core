@@ -115,12 +115,24 @@ func PackContext(req PackRequest, version string) PackResult {
 	}
 	related := CollectRelatedNames(items)
 
-	stable, dynamic := formatPackMarkdownParts(req.Task, items, related, cat.Roots, version, len(entries) == 0, budget, used, scrub)
+	empty := len(entries) == 0
+	// G-1 Prompt-Cache Aligned: reuse markdown_stable when selected_names set
+	// (+ version) is unchanged; always rebuild markdown_dynamic for the task.
+	memoKey := StableMemoKey(names, version)
+	var stable, dynamic string
+	if cached, ok := lookupStableMemo(memoKey); ok {
+		stable = cached
+		dynamic = formatPackMarkdownDynamic(req.Task, items, related, cat.Roots, empty, budget, used, scrub)
+	} else {
+		stable = formatPackMarkdownStable(items, version, empty)
+		dynamic = formatPackMarkdownDynamic(req.Task, items, related, cat.Roots, empty, budget, used, scrub)
+		storeStableMemo(memoKey, stable)
+	}
 	md := stable + dynamic
 
-	note := "v1.1: cache-stable pack prefix + OS-aware IDF + budget tiers + scrub"
-	if len(entries) == 0 {
-		note = "v1.1: empty catalog (no SKILL.md under roots)"
+	note := "v1.3: Prompt-Cache Aligned stable reuse + OS-aware IDF + budget tiers + scrub"
+	if empty {
+		note = "v1.3: empty catalog (no SKILL.md under roots)"
 	}
 
 	return PackResult{
@@ -132,7 +144,7 @@ func PackContext(req PackRequest, version string) PackResult {
 		EstimatedTokens: EstimateTokens(md),
 		SelectedCount:   len(items),
 		CatalogSize:     len(entries),
-		EmptyCatalog:    len(entries) == 0,
+		EmptyCatalog:    empty,
 		SelectedNames:   names,
 		Related:         related,
 		Items:           items,
@@ -262,6 +274,12 @@ func IdenticalPrefixOverlapPct(a, b string) float64 {
 // Hosts should pin markdown_stable across turns when the skill set is unchanged;
 // mutating only markdown_dynamic preserves provider prefix-cache friendliness.
 func formatPackMarkdownParts(task string, items []PackItem, related []string, roots []string, version string, empty bool, budget BudgetResolution, used int, scrub ScrubReport) (stable, dynamic string) {
+	return formatPackMarkdownStable(items, version, empty),
+		formatPackMarkdownDynamic(task, items, related, roots, empty, budget, used, scrub)
+}
+
+// formatPackMarkdownStable builds the procedural (Prompt-Cache Aligned) prefix.
+func formatPackMarkdownStable(items []PackItem, version string, empty bool) string {
 	var stab strings.Builder
 	stab.WriteString("# SmartContext pack\n\n")
 	stab.WriteString(fmt.Sprintf("- **version**: %s\n\n", version))
@@ -297,7 +315,11 @@ func formatPackMarkdownParts(task string, items []PackItem, related []string, ro
 			stab.WriteString("\n")
 		}
 	}
+	return stab.String()
+}
 
+// formatPackMarkdownDynamic builds the episodic (per-call) suffix.
+func formatPackMarkdownDynamic(task string, items []PackItem, related []string, roots []string, empty bool, budget BudgetResolution, used int, scrub ScrubReport) string {
 	var dyn strings.Builder
 	dyn.WriteString("## Call context\n\n")
 	dyn.WriteString(fmt.Sprintf("- **task**: %s\n", task))
@@ -330,5 +352,5 @@ func formatPackMarkdownParts(task string, items []PackItem, related []string, ro
 	}
 	dyn.WriteString("\n")
 	dyn.WriteString(formatSecurityMarkdown(scrub))
-	return stab.String(), dyn.String()
+	return dyn.String()
 }

@@ -8,7 +8,7 @@ workspace roots, pack structured markdown under a token budget, expose MCP over
 |---|---|
 | **Line** | **smartcontext-core** (OSS) |
 | **Module** | `github.com/Cold104/smartcontext-core` |
-| **Version** | `1.2.1` |
+| **Version** | `1.3.0` |
 | **License** | [Apache-2.0](LICENSE) · [NOTICE](NOTICE) |
 | **Location** | Staged extract at `F:/Projects/smartcontext-core` (from monorepo `Repos/smartcontext/go`) |
 | **Pro** | Private `github.com/Cold104/smartcontext-pro` imports this module |
@@ -36,6 +36,11 @@ Dual-track versions: `F:/Projects/SmartContext/Docs/OVERVIEW/VERSION_POLICY.md`.
 | `markdown_stable` | **Procedural** skill bodies — pin across turns for provider KV/prefix-cache hits |
 | `markdown_dynamic` | **Episodic** task/meta — expected to change every turn |
 
+**G-1 (v1.3.0):** when the `selected_names` set is unchanged across packs, Core
+reuses prior `markdown_stable` bytes (skip rebuild) and only refreshes
+`markdown_dynamic`. Key: sorted `selected_names` + pack `version`
+(`StableMemoKey`).
+
 Hosts should inject the stable block once (or when `selected_names` changes) and
 mutate only the dynamic tail. Details: [`docs/PREFIX_CACHE_PACK.md`](docs/PREFIX_CACHE_PACK.md).
 
@@ -50,7 +55,7 @@ Set-Location -Path 'F:\Projects\smartcontext-core'
 # Windows: GUI subsystem so Cursor/GUI hosts do not flash a console window.
 # Stdio MCP still works — parent-attached pipes are unchanged; only AllocConsole is skipped.
 go build -ldflags="-H windowsgui" -o smartcontext.exe ./cmd/smartcontext
-.\smartcontext.exe version   # smartcontext 1.2.1
+.\smartcontext.exe version   # smartcontext 1.3.0
 .\smartcontext.exe mcp       # stdio MCP server
 ```
 
@@ -140,7 +145,7 @@ internal/lifecycle/   # triage, aliases, telemetry, session, refine list
 internal/core/        # roots, discover, catalog, IDF rank, budget, scrub
 internal/core/ast/    # Filter interface + stub
 internal/winproc/     # Windows HideConsole / FreeConsole / console probe
-internal/version/     # 1.2.1
+version/              # 1.3.0
 baseline/             # INDEX.json + skill/rule scaffolding (ADD only)
 docs/                 # PREFIX_CACHE_PACK, SKILL_ROOT_DISCOVERY, TELEMETRY_CONTRACT, …
 ```

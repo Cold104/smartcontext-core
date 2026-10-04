@@ -1,8 +1,8 @@
 # Cache-stable pack layout (KV / prefix cache)
 
-**Publication gate:** CLOSED — engineering guidance only.
+**Publication gate:** OPEN for Core only — engineering + product guidance.
 
-## Value (KV-cache first)
+## Value (KV-cache first) — Prompt-Cache Aligned
 
 SmartContext structures packs for **maximum provider prefix-cache (KV-cache) hits**,
 not token cut alone. Token reduction is supporting evidence; a rewritten pack that
@@ -11,6 +11,13 @@ unchanged.
 
 Primary product line for hosts: pin procedural skill bodies at the top so the
 provider can reuse the cached prefix; mutate only the episodic tail each turn.
+
+### G-1 Core reuse (v1.3.0)
+
+Process-local memo: when `StableMemoKey(selected_names, version)` is unchanged
+across packs (sorted name set + version), Core **reuses** prior `markdown_stable`
+bytes and only rebuilds `markdown_dynamic`. This keeps the procedural prefix
+byte-stable for host pin without re-serializing skill cards.
 
 ## Procedural vs episodic
 

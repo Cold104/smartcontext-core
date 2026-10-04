@@ -131,6 +131,86 @@ func TestCacheHitProxyMarkdownStableOverlap(t *testing.T) {
 	}
 }
 
+// TestMarkdownStableReuseWhenSelectedNamesUnchanged is G-1: process-local
+// memo keyed by StableMemoKey(selected_names, version) skips rebuilding
+// markdown_stable; a task-only change updates markdown_dynamic only.
+func TestMarkdownStableReuseWhenSelectedNamesUnchanged(t *testing.T) {
+	ResetMarkdownStableCache()
+	t.Cleanup(ResetMarkdownStableCache)
+
+	root := t.TempDir()
+	writePackCacheSkill(t, root, "alpha-skill", "alpha workflow helper", "ALPHA_BODY")
+	writePackCacheSkill(t, root, "zeta-skill", "zeta workflow helper", "ZETA_BODY")
+	t.Setenv("SMARTCONTEXT_SKILL_ROOTS", root)
+	t.Setenv("SMARTCONTEXT_WORKSPACE_ROOTS", "")
+
+	sticky := []string{"alpha-skill", "zeta-skill"}
+	first := PackContext(PackRequest{
+		Task: "first task phrasing about alpha", TopN: 2, BudgetTokens: 4000, IncludeBodies: true,
+		StickyNames: sticky,
+	}, "1.3.0-test")
+	if first.MarkdownStable == "" {
+		t.Fatal("expected non-empty markdown_stable")
+	}
+	if MarkdownStableCacheHits() != 0 {
+		t.Fatalf("first pack must miss memo; hits=%d", MarkdownStableCacheHits())
+	}
+
+	second := PackContext(PackRequest{
+		Task: "second task phrasing about zeta", TopN: 2, BudgetTokens: 4000, IncludeBodies: true,
+		StickyNames: sticky,
+	}, "1.3.0-test")
+	if MarkdownStableCacheHits() != 1 {
+		t.Fatalf("second pack with same selected_names must reuse stable; hits=%d", MarkdownStableCacheHits())
+	}
+	if !bytes.Equal([]byte(first.MarkdownStable), []byte(second.MarkdownStable)) {
+		t.Fatalf("reused markdown_stable must be byte-identical\n---a---\n%q\n---b---\n%q",
+			first.MarkdownStable, second.MarkdownStable)
+	}
+	if first.MarkdownDynamic == second.MarkdownDynamic {
+		t.Fatal("task change must update markdown_dynamic")
+	}
+	if !strings.Contains(second.MarkdownDynamic, "second task phrasing") {
+		t.Fatalf("markdown_dynamic missing new task: %q", second.MarkdownDynamic)
+	}
+	if strings.Contains(second.MarkdownStable, "second task") || strings.Contains(second.MarkdownStable, "first task") {
+		t.Fatal("markdown_stable must not embed task text")
+	}
+	sa := append([]string(nil), first.SelectedNames...)
+	sb := append([]string(nil), second.SelectedNames...)
+	slices.Sort(sa)
+	slices.Sort(sb)
+	if !slices.Equal(sa, sb) {
+		t.Fatalf("selected_names set changed: %v vs %v", first.SelectedNames, second.SelectedNames)
+	}
+	if StableMemoKey(first.SelectedNames, "1.3.0-test") != StableMemoKey(second.SelectedNames, "1.3.0-test") {
+		t.Fatal("StableMemoKey must match for equal selected_names sets")
+	}
+}
+
+func TestMarkdownStableMemoMissesOnSelectionChange(t *testing.T) {
+	ResetMarkdownStableCache()
+	t.Cleanup(ResetMarkdownStableCache)
+
+	root := t.TempDir()
+	writePackCacheSkill(t, root, "alpha-skill", "alpha workflow helper", "ALPHA_BODY")
+	writePackCacheSkill(t, root, "zeta-skill", "zeta workflow helper", "ZETA_BODY")
+	t.Setenv("SMARTCONTEXT_SKILL_ROOTS", root)
+	t.Setenv("SMARTCONTEXT_WORKSPACE_ROOTS", "")
+
+	_ = PackContext(PackRequest{
+		Task: "alpha only", TopN: 1, BudgetTokens: 4000, IncludeBodies: true,
+		StickyNames: []string{"alpha-skill"},
+	}, "1.3.0-test")
+	_ = PackContext(PackRequest{
+		Task: "zeta only", TopN: 1, BudgetTokens: 4000, IncludeBodies: true,
+		StickyNames: []string{"zeta-skill"},
+	}, "1.3.0-test")
+	if MarkdownStableCacheHits() != 0 {
+		t.Fatalf("different selected_names must not reuse stable; hits=%d", MarkdownStableCacheHits())
+	}
+}
+
 func TestStickyNamesSurviveMidTaskRepack(t *testing.T) {
 	root := t.TempDir()
 	const needle = "NEEDLE_TOKEN_9f3c2a1b"

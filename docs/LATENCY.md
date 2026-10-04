@@ -64,7 +64,7 @@ go test ./internal/lifecycle/ -run '^TestPackLatencyAttribution$' -count=1 -v
 | `core.PackContext` only | ~5.7 ms | ~5.7 ms |
 | `HashStablePrefix` / SHA-256 of ~1.3 KB `markdown_stable` | ~0.8 µs | ~0 µs memo hit when stable unchanged |
 | `LoadOffloadPointers` via `EnsureLayout` + miss | **~330 µs** (`EnsureLayout` MkdirAll) | ~35 µs (`Stat` + cached empty; no layout) |
-| Full `markdown_stable` rebuild memo | n/a | **not cached** (parked for 1.3.0 / G-1) |
+| Full `markdown_stable` rebuild memo | rebuild every pack | **G-1 (1.3.0):** reuse when `StableMemoKey(selected_names, version)` unchanged |
 
 **Root cause order:** (B) per-pack `EnsureLayout` on offload session read much
 greater than (A) SHA-256 of stable markdown, which is much greater than (C)
