@@ -19,8 +19,10 @@ func PackContext(req core.PackRequest) core.PackResult {
 		EnsureLayout(home)
 		aliases := LoadAliasMap(home)
 		req.Task = ExpandTaskTokens(req.Task, aliases)
+		// Explicit caller sticky_names always win; otherwise reuse persisted names
+		// only for the same task (task_hash) or within StickyTTL (mid-task drift).
 		if StickySessionEnabled() && len(req.StickyNames) == 0 {
-			req.StickyNames = LoadStickyNames(home)
+			req.StickyNames = LoadStickyNamesFor(home, HashTask(req.Task), time.Now())
 		}
 
 		start := time.Now()
@@ -69,6 +71,7 @@ func applyTriageToPack(result core.PackResult, prefs TriagePrefs) core.PackResul
 		}
 	}
 	items := append(pinned, rest...)
+	core.RenumberItems(items)
 	names := make([]string, 0, len(items))
 	for _, it := range items {
 		names = append(names, it.Name)

@@ -5,7 +5,10 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"os"
+	"path/filepath"
+	"runtime"
 	"sort"
+	"strings"
 	"time"
 
 	"github.com/Cold104/smartcontext-core/core"
@@ -44,6 +47,30 @@ type Watermark struct {
 	CatalogFingerprint string            `json:"catalog_fingerprint"`
 	SkillNames         []string          `json:"skill_names"`
 	SkillMtimes        map[string]string `json:"skill_mtimes,omitempty"`
+	// RootsHash identifies the resolved root set the snapshot was taken over
+	// (see rootsHash). Empty on pre-1.3.x watermarks.
+	RootsHash string   `json:"roots_hash,omitempty"`
+	Roots     []string `json:"roots,omitempty"`
+}
+
+// WatermarkResetRootsChanged is the delta reason when the watermark's root set
+// differs from the current one.
+const WatermarkResetRootsChanged = "roots changed, watermark reset"
+
+// rootsHash is an order-independent SHA-256 over cleaned resolved roots
+// (case-folded on Windows, where paths are case-insensitive).
+func rootsHash(roots []string) string {
+	norm := make([]string, 0, len(roots))
+	for _, r := range roots {
+		r = filepath.Clean(r)
+		if runtime.GOOS == "windows" {
+			r = strings.ToLower(r)
+		}
+		norm = append(norm, r)
+	}
+	sort.Strings(norm)
+	sum := sha256.Sum256([]byte(strings.Join(norm, "\n")))
+	return hex.EncodeToString(sum[:])
 }
 
 // SkillDeltaChange is one added/removed/modified/refine_proposal row.
@@ -61,6 +88,12 @@ type SkillDelta struct {
 	CatalogFingerprint string             `json:"catalog_fingerprint"`
 	Changes            []SkillDeltaChange `json:"changes"`
 	HasWatermark       bool               `json:"has_watermark"`
+	// WatermarkReset is true when the stored watermark was taken over a
+	// different resolved root set (or predates roots_hash). The catalog diff is
+	// skipped and the current catalog becomes the new baseline.
+	WatermarkReset       bool   `json:"watermark_reset,omitempty"`
+	WatermarkResetReason string `json:"watermark_reset_reason,omitempty"`
+	RootsHash            string `json:"roots_hash,omitempty"`
 }
 
 func catalogFingerprint(cat core.Catalog) string {
@@ -133,6 +166,8 @@ func SaveWatermark(cat core.Catalog, home string) (*Watermark, error) {
 		CatalogFingerprint: catalogFingerprint(cat),
 		SkillNames:         skillNames(cat),
 		SkillMtimes:        skillMtimes(cat),
+		RootsHash:          rootsHash(cat.Roots),
+		Roots:              append([]string(nil), cat.Roots...),
 	}
 	path := sessionWatermarkPath(home)
 	payload, err := json.MarshalIndent(w, "", "  ")
@@ -148,6 +183,7 @@ func SaveWatermark(cat core.Catalog, home string) (*Watermark, error) {
 func computeDelta(cat core.Catalog, home string, pending []Proposal) SkillDelta {
 	now := time.Now().UTC().Truncate(time.Second).Format(time.RFC3339)
 	fp := catalogFingerprint(cat)
+	rh := rootsHash(cat.Roots)
 	wm := LoadWatermark(home)
 	current := map[string]core.Entry{}
 	for _, e := range cat.Entries {
@@ -156,7 +192,12 @@ func computeDelta(cat core.Catalog, home string, pending []Proposal) SkillDelta 
 		}
 	}
 	var changes []SkillDeltaChange
-	if wm == nil {
+	reset := wm != nil && wm.RootsHash != rh
+	if reset {
+		// Different (or unknown, pre-roots_hash) root set: a name diff would
+		// report the whole catalog as added/removed. Re-baseline instead.
+		_, _ = SaveWatermark(cat, home)
+	} else if wm == nil {
 		for _, name := range skillNames(cat) {
 			changes = append(changes, SkillDeltaChange{
 				Name: name, Kind: "added", Timestamp: now,
@@ -224,6 +265,11 @@ func computeDelta(cat core.Catalog, home string, pending []Proposal) SkillDelta 
 		CatalogFingerprint: fp,
 		Changes:            changes,
 		HasWatermark:       wm != nil,
+		WatermarkReset:     reset,
+		RootsHash:          rh,
+	}
+	if reset {
+		delta.WatermarkResetReason = WatermarkResetRootsChanged
 	}
 	_ = saveLastDelta(delta, home)
 	return delta
@@ -274,6 +320,9 @@ func SessionStart(req SessionStartRequest) SessionStartResult {
 	refine := ListProposals(home, "pending")
 	result.Refine = refine
 	result.Delta = computeDelta(cat, home, refine.Proposals)
+	if result.Delta.WatermarkReset {
+		result.Note += "; " + result.Delta.WatermarkResetReason
+	}
 
 	if req.MarkSession {
 		if w, err := SaveWatermark(cat, home); err == nil {

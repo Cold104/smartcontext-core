@@ -30,7 +30,39 @@ var denyPathSegments = map[string]struct{}{
 	"build":            {},
 }
 
+// inClaudeSyncedMirror reports paths inside the Claude desktop account-skill
+// mirror (.claude/skills/synced/<account-id>/...). Only paths with at least one
+// directory below "synced" are denied, so a user skill literally named
+// "synced" (.claude/skills/synced/SKILL.md) and "synced" dirs outside
+// .claude/skills stay discoverable.
+func inClaudeSyncedMirror(path string) bool {
+	parts := strings.Split(filepath.ToSlash(path), "/")
+	for i := 0; i+2 < len(parts); i++ {
+		if !strings.EqualFold(parts[i], ".claude") ||
+			!strings.EqualFold(parts[i+1], "skills") ||
+			!strings.EqualFold(parts[i+2], "synced") {
+			continue
+		}
+		rest := parts[i+3:]
+		if len(rest) > 0 && rest[len(rest)-1] == "" {
+			rest = rest[:len(rest)-1] // trailing separator
+		}
+		switch {
+		case len(rest) == 0:
+			return false // the synced dir itself (files below it are checked individually)
+		case len(rest) == 1 && isCatalogDoc(rest[0]):
+			return false // .claude/skills/synced/SKILL.md: a skill named "synced"
+		default:
+			return true
+		}
+	}
+	return false
+}
+
 func pathDenied(path string) bool {
+	if inClaudeSyncedMirror(path) {
+		return true
+	}
 	for _, part := range strings.Split(path, string(os.PathSeparator)) {
 		if _, ok := denyPathSegments[part]; ok {
 			return true

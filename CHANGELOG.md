@@ -1,5 +1,42 @@
 # Changelog — SmartContext Go MCP
 
+## [Unreleased]
+
+Bug fixes + minimal Pro hooks (no new Core features).
+
+### Fixed
+
+- **Sticky carry-over:** persisted session sticky names are reused only when the
+  stored `task_hash` matches the current task, or (phrasing drift mid-task) when
+  `updated_at` is within `SMARTCONTEXT_STICKY_TTL` (default `30m`; `0` = same
+  task only). Legacy state without `task_hash`/`updated_at` never carries over.
+  Explicit `sticky_names` and `clear_sticky` unchanged.
+- **Sticky score leak:** sticky items keep their real rank score (was pinned at
+  `1e9`, leaking into `score:*` lines and telemetry); precedence is by position.
+- **Discovery:** `.claude/skills/synced/<account>/…` (Claude desktop account
+  mirror) is denied; `.claude/skills/synced/SKILL.md` and `synced` dirs
+  elsewhere stay discoverable.
+- **Rank noise:** more function-word stopwords; generic dev verbs (add, new,
+  update, fix, …) weighted ×0.3; path-only token matches weighted ×0.25; query
+  tokens in >50% of a catalog of ≥8 entries ignored; `tags` now count as
+  selection text.
+- **Session watermark:** watermark stores `roots_hash`; a different (or legacy,
+  unhashed) root set re-baselines with `delta.watermark_reset` /
+  `"roots changed, watermark reset"` instead of listing every skill as
+  added/removed.
+- **Test isolation:** packages that exercise lifecycle set a temp
+  `SMARTCONTEXT_HOME` in `TestMain` (tests previously wrote sticky/telemetry
+  into the real `~/.smartcontext`).
+
+### Added (hooks for Pro)
+
+- `PackItem.rank`, `PackItem.sticky`, `PackItem.estimated_tokens` (chars/4, as
+  the budget gate).
+- `mcp.ServerOptions.PostProcessStable` and `core.ReplaceMarkdownStable` to
+  post-process `markdown_stable` before `EnrichPack` with `markdown` /
+  `estimated_tokens` kept consistent. `core.RenumberItems` after reorders.
+- CI: `.github/workflows/ci.yml` (gofmt, vet, test on ubuntu + windows).
+
 ## [1.3.0] — 2026-10-04
 
 G-1 Prompt-Cache Aligned stable reuse. Publication gate **OPEN for Core only**.
