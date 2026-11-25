@@ -24,7 +24,17 @@ type ServerOptions struct {
 	// EnrichPack, when non-nil, wraps every pack_context result (Pro may no-op
 	// internally when handoff/AST flags are off).
 	EnrichPack PackEnricher
+	// PostProcessStable, when non-nil, may rewrite the rendered markdown_stable
+	// (e.g. a Pro renderer). It runs after lifecycle packing and before
+	// EnrichPack; Core recomposes markdown and estimated_tokens via
+	// core.ReplaceMarkdownStable. It must be deterministic for a given item set
+	// to keep the prompt-cache prefix byte-stable.
+	PostProcessStable StablePostProcessor
 }
+
+// StablePostProcessor returns the markdown_stable to use for a pack. Returning
+// plain.MarkdownStable unchanged is a no-op.
+type StablePostProcessor func(req core.PackRequest, plain core.PackResult) string
 
 type packArgs struct {
 	Task           string   `json:"task" jsonschema:"Task description to pack context for"`
@@ -98,7 +108,7 @@ func RegisterCoreTools(server *mcp.Server, opt ServerOptions) {
 			"Session sticky_names keep goal skills across mid-task re-packs (clear_sticky to reset). " +
 			"format=json omits duplicate markdown text content (less stdio). " +
 			"Optional roots; pointer_handoff / ast_filter require a Pro enricher hook.",
-	}, makeHandlePackContext(opt.EnrichPack))
+	}, makeHandlePackContext(opt.EnrichPack, opt.PostProcessStable))
 
 	mcp.AddTool(server, &mcp.Tool{
 		Name: "discover_skills",
@@ -138,7 +148,7 @@ func RegisterCoreTools(server *mcp.Server, opt ServerOptions) {
 	}
 }
 
-func makeHandlePackContext(enrich PackEnricher) func(
+func makeHandlePackContext(enrich PackEnricher, postStable StablePostProcessor) func(
 	ctx context.Context,
 	req *mcp.CallToolRequest,
 	args packArgs,
@@ -181,6 +191,11 @@ func makeHandlePackContext(enrich PackEnricher) func(
 		}
 
 		plain := lifecycle.PackContext(packReq)
+		if postStable != nil {
+			if stable := postStable(packReq, plain); stable != plain.MarkdownStable {
+				plain = core.ReplaceMarkdownStable(plain, stable)
+			}
+		}
 		var (
 			payload  []byte
 			err      error

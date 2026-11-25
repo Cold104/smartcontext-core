@@ -251,8 +251,10 @@ func fitItemsToBudget(task string, selected []scoredEntry, budgetTokens int, inc
 			Description: s.entry.Description,
 			Score:       s.score,
 			Related:     append([]string(nil), s.entry.Related...),
+			Sticky:      s.sticky,
 		}
 		if used+cardTokens > budgetTokens {
+			item.EstimatedTokens = cardTokens
 			items = append(items, item)
 			used += cardTokens
 			break
@@ -270,6 +272,7 @@ func fitItemsToBudget(task string, selected []scoredEntry, budgetTokens int, inc
 			item.Body = body
 			cardTokens += EstimateTokens(body)
 		}
+		item.EstimatedTokens = cardTokens
 		items = append(items, item)
 		used += cardTokens
 		if used >= budgetTokens {

@@ -15,6 +15,27 @@ var stopwords = map[string]struct{}{
 	"as": {}, "at": {}, "or": {}, "from": {}, "into": {}, "than": {}, "then": {},
 	"this": {}, "that": {}, "these": {}, "those": {}, "i": {}, "we": {},
 	"you": {}, "my": {}, "our": {},
+	// v1.3.x: common English function words / conversational filler.
+	"are": {}, "was": {}, "were": {}, "been": {}, "being": {}, "am": {},
+	"do": {}, "does": {}, "did": {}, "can": {}, "could": {}, "should": {},
+	"would": {}, "will": {}, "shall": {}, "may": {}, "might": {}, "must": {},
+	"have": {}, "has": {}, "had": {}, "not": {}, "but": {}, "if": {}, "so": {},
+	"its": {}, "their": {}, "there": {}, "here": {}, "what": {}, "which": {},
+	"who": {}, "when": {}, "where": {}, "how": {}, "why": {}, "me": {}, "us": {},
+	"your": {}, "they": {}, "them": {}, "he": {}, "she": {}, "his": {}, "her": {},
+	"also": {}, "just": {}, "very": {}, "some": {}, "about": {}, "please": {},
+	"want": {}, "need": {}, "let": {}, "lets": {}, "now": {}, "again": {},
+	"etc": {}, "eg": {}, "ie": {},
+}
+
+// genericTaskWords are common dev verbs/adjectives that appear in most task
+// phrasings ("add a new X", "update/fix Y"). They are not dropped (a skill
+// named "fix-flaky-tests" should still match "fix") but carry only
+// genericWordFactor of their IDF weight.
+var genericTaskWords = map[string]struct{}{
+	"add": {}, "make": {}, "use": {}, "using": {}, "new": {}, "update": {},
+	"fix": {}, "create": {}, "change": {}, "get": {}, "run": {}, "implement": {},
+	"write": {}, "work": {}, "thing": {}, "stuff": {},
 }
 
 // Local trade-secret weights stay simple: name > description, no remote model.
@@ -24,6 +45,18 @@ const (
 	triggerMatchBoost = 1.5
 	osMatchBoost      = 1.5
 	osMismatchFactor  = 0.35
+	// pathOnlyFactor scales a match found only in the file path (directory
+	// names such as the user, repo or ".cursor/skills"), not in name /
+	// description / tags.
+	pathOnlyFactor = 0.25
+	// genericWordFactor scales genericTaskWords matches.
+	genericWordFactor = 0.3
+	// highDFRatio: query tokens present in more than this fraction of the
+	// catalog carry no selection signal and get weight 0. Applied only when
+	// the catalog has at least highDFMinCatalog entries (tiny catalogs keep
+	// plain IDF so a 2-of-3 match still discriminates).
+	highDFRatio      = 0.5
+	highDFMinCatalog = 8
 )
 
 func normalizeToken(token string) string {
@@ -75,7 +108,8 @@ func scoreEntryIDF(queryTokens map[string]struct{}, weights map[string]float64, 
 		return 0
 	}
 	nameToks := tokenSet(tokenize(e.Name))
-	hayToks := tokenSet(tokenize(e.Name + " " + e.Description + " " + e.Path))
+	semToks := tokenSet(tokenize(semanticText(e)))
+	pathToks := tokenSet(tokenize(e.Path))
 	var score float64
 	for tok := range queryTokens {
 		w, ok := weights[tok]
@@ -86,11 +120,21 @@ func scoreEntryIDF(queryTokens map[string]struct{}, weights map[string]float64, 
 			score += w * nameBoost
 			continue
 		}
-		if _, inHay := hayToks[tok]; inHay {
+		if _, inSem := semToks[tok]; inSem {
 			score += w
+			continue
+		}
+		if _, inPath := pathToks[tok]; inPath {
+			score += w * pathOnlyFactor
 		}
 	}
 	return score
+}
+
+// semanticText is the selection text a skill author controls: name,
+// description and tags (path tokens are scored separately and down-weighted).
+func semanticText(e Entry) string {
+	return e.Name + " " + e.Description + " " + strings.Join(e.Tags, " ")
 }
 
 func aliasBoostForTask(task string, e Entry) float64 {
@@ -167,7 +211,7 @@ func scoreAll(entries []Entry, task string, hostOS string) []scoredEntry {
 	qTokens := tokenSet(tokenize(task))
 	docFreq := make(map[string]int, len(qTokens))
 	for _, e := range entries {
-		hay := tokenSet(tokenize(e.Name + " " + e.Description + " " + e.Path))
+		hay := tokenSet(tokenize(semanticText(e) + " " + e.Path))
 		for tok := range qTokens {
 			if _, ok := hay[tok]; ok {
 				docFreq[tok]++
@@ -181,7 +225,15 @@ func scoreAll(entries []Entry, task string, hostOS string) []scoredEntry {
 	weights := make(map[string]float64, len(qTokens))
 	for tok := range qTokens {
 		df := float64(docFreq[tok])
-		weights[tok] = math.Log(1 + total/(1+df))
+		if len(entries) >= highDFMinCatalog && df/total > highDFRatio {
+			weights[tok] = 0
+			continue
+		}
+		w := math.Log(1 + total/(1+df))
+		if _, generic := genericTaskWords[tok]; generic {
+			w *= genericWordFactor
+		}
+		weights[tok] = w
 	}
 
 	scored := make([]scoredEntry, len(entries))

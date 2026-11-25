@@ -42,6 +42,15 @@ type PackItem struct {
 	Score       float64  `json:"score"`
 	Body        string   `json:"body,omitempty"`
 	Related     []string `json:"related,omitempty"`
+	// Rank is the 1-based position in Items (final order after sticky merge
+	// and triage). Exposed for Pro EnrichPack / pack manifests.
+	Rank int `json:"rank"`
+	// Sticky is true when the item was force-included via sticky names
+	// (explicit or session) rather than selected by rank alone.
+	Sticky bool `json:"sticky,omitempty"`
+	// EstimatedTokens is the card (+ body when included) cost under the same
+	// ~4 chars/token heuristic the budget gate uses (EstimateTokens).
+	EstimatedTokens int `json:"estimated_tokens"`
 }
 
 // PackResult is the pack_context response (IDF rank + budget dial + scrub).
@@ -71,8 +80,28 @@ type PackResult struct {
 }
 
 type scoredEntry struct {
-	entry Entry
-	score float64
+	entry  Entry
+	score  float64
+	sticky bool
+}
+
+// RenumberItems sets 1-based Rank from slice order. Call after any reorder or
+// filter of PackResult.Items (e.g. lifecycle triage).
+func RenumberItems(items []PackItem) {
+	for i := range items {
+		items[i].Rank = i + 1
+	}
+}
+
+// ReplaceMarkdownStable returns a copy of r whose MarkdownStable is stable,
+// with Markdown (= stable + dynamic) and EstimatedTokens recomposed. It is the
+// supported way for a host hook (e.g. a Pro renderer) to post-process the
+// rendered stable prefix without desynchronizing the combined markdown.
+func ReplaceMarkdownStable(r PackResult, stable string) PackResult {
+	r.MarkdownStable = stable
+	r.Markdown = stable + r.MarkdownDynamic
+	r.EstimatedTokens = EstimateTokens(r.Markdown)
+	return r
 }
 
 // PackContext discovers skills, ranks by thin IDF (+ OS/alias), packs under a token budget, scrubs bodies.
@@ -106,8 +135,9 @@ func PackContext(req PackRequest, version string) PackResult {
 	}
 
 	selected := rankAndSelect(entries, req.Task, req.TopN)
-	selected = mergeStickySelections(entries, selected, req.StickyNames, req.TopN)
+	selected = mergeStickySelections(entries, selected, req.StickyNames, req.TopN, req.Task)
 	items, used, scrub := fitItemsToBudget(req.Task, selected, budget.BudgetTokens, req.IncludeBodies, DefaultBodyChars, redact)
+	RenumberItems(items)
 
 	names := make([]string, 0, len(items))
 	for _, it := range items {
@@ -161,13 +191,32 @@ func PackContext(req PackRequest, version string) PackResult {
 
 // mergeStickySelections forces sticky names (when present in the catalog) ahead of
 // ranked hits so mid-task re-packs do not drop goal skills when phrasing drifts.
-func mergeStickySelections(entries []Entry, ranked []scoredEntry, sticky []string, topN int) []scoredEntry {
+//
+// Sticky items keep their real rank score (for telemetry / Pro manifests) and
+// are flagged sticky; their precedence comes from list position, which
+// fitItemsToBudget preserves, not from a pinned score.
+func mergeStickySelections(entries []Entry, ranked []scoredEntry, sticky []string, topN int, task string) []scoredEntry {
 	if len(sticky) == 0 {
 		return ranked
 	}
 	byName := make(map[string]Entry, len(entries))
 	for _, e := range entries {
 		byName[strings.ToLower(e.Name)] = e
+	}
+	var realScore map[string]float64
+	scoreOf := func(e Entry) float64 {
+		for _, s := range ranked {
+			if strings.EqualFold(s.entry.Name, e.Name) && s.entry.Kind == e.Kind {
+				return s.score
+			}
+		}
+		if realScore == nil {
+			realScore = make(map[string]float64, len(entries))
+			for _, s := range scoreAll(entries, task, HostOSCanonical()) {
+				realScore[CatalogKey(s.entry.Kind, s.entry.Name)] = s.score
+			}
+		}
+		return realScore[CatalogKey(e.Kind, e.Name)]
 	}
 	seen := map[string]struct{}{}
 	var out []scoredEntry
@@ -184,7 +233,7 @@ func mergeStickySelections(entries []Entry, ranked []scoredEntry, sticky []strin
 			continue
 		}
 		seen[key] = struct{}{}
-		out = append(out, scoredEntry{entry: e, score: 1e9}) // pin ahead of IDF
+		out = append(out, scoredEntry{entry: e, score: scoreOf(e), sticky: true}) // position pins ahead of IDF hits
 	}
 	skillSlots := topN
 	if skillSlots <= 0 {
